@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayora — Your Day. Your Focus. Your Sky.</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= SKY DECORATIVE LAYER ================= -->
+<div class="sky-layer" id="skyLayer" aria-hidden="true"></div>
+
+<!-- ================= NAVIGATION ================= -->
+<div class="nav-wrap">
+  <nav class="nav-pill">
+    <button class="brand" data-nav="home" aria-label="Dayora home">
+      ☁ DAY<span class="o-star">✦</span>RA
+    </button>
+    <ul class="nav-links" role="tablist">
+      <li><button data-nav="home" class="active">Home</button></li>
+      <li><button data-nav="tasks">Tasks</button></li>
+      <li><button data-nav="pomodoro">Pomodoro</button></li>
+      <li><button data-nav="budget">Budget</button></li>
+      <li><button data-nav="about">About</button></li>
+    </ul>
+    <button class="theme-toggle" aria-pressed="false" aria-label="Switch to night sky" title="Toggle day / night sky">
+      <span class="knob">✦</span>
+    </button>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</div>
+<div class="mobile-menu" id="mobileMenu">
+  <button data-nav="home" class="active">Home</button>
+  <button data-nav="tasks">Tasks</button>
+  <button data-nav="pomodoro">Pomodoro</button>
+  <button data-nav="budget">Budget</button>
+  <button data-nav="about">About</button>
+  <div class="mm-theme-row">
+    <span class="theme-toggle-label">Day Sky</span>
+    <button class="theme-toggle" aria-pressed="false" aria-label="Switch to night sky" title="Toggle day / night sky">
+      <span class="knob">✦</span>
+    </button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ================= HOME ================= -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <span class="hero-eyebrow">✦ Welcome to your sky</span>
+      <h1><span>YOUR DAY.</span><span>YOUR FOCUS.</span><span>YOUR SKY.</span></h1>
+      <p class="lede">A peaceful place to organize your day, focus on what matters, and turn small moments of productivity into big achievements.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" data-nav="tasks">Plan My Day</button>
+        <button class="btn btn-ghost" data-nav="pomodoro">Start Focus</button>
+      </div>
+    </div>
+
+    <div class="overview">
+      <h2 class="section-heading">Make Today Count</h2>
+      <div class="feature-grid">
+        <div class="feature-card reveal-target">
+          <span class="icon">☁</span>
+          <h3>Tasks</h3>
+          <p>Organize everything you need to accomplish, one clear task at a time.</p>
+          <button class="btn btn-primary" data-nav="tasks">View Tasks</button>
+        </div>
+        <div class="feature-card reveal-target">
+          <span class="icon">✦</span>
+          <h3>Pomodoro</h3>
+          <p>Work in focused sessions and take meaningful breaks above the clouds.</p>
+          <button class="btn btn-primary" data-nav="pomodoro">Start Focus</button>
+        </div>
+        <div class="feature-card reveal-target">
+          <span class="icon">◈</span>
+          <h3>Budget</h3>
+          <p>Track today's spending and see the bigger picture across the month.</p>
+          <button class="btn btn-primary" data-nav="budget">View Budget</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="philosophy reveal-target">
+      <h2>PLAN LIKE THE WIND.<br>FOCUS LIKE THE SKY.<br>REST LIKE A CLOUD.</h2>
+    </div>
+  </section>
+
+  <!-- ================= TASKS ================= -->
+  <section class="view" id="view-tasks">
+    <div class="page-head">
+      <h1>Plan Your Day</h1>
+      <p>Turn your thoughts into clear, manageable tasks.</p>
+    </div>
+
+    <div class="tasks-wrap">
+      <div class="stat-row">
+        <div class="stat-card"><span class="num" id="statTotal">0</span><span class="lbl">Total</span></div>
+        <div class="stat-card"><span class="num" id="statRemaining">0</span><span class="lbl">Remaining</span></div>
+        <div class="stat-card"><span class="num" id="statCompleted">0</span><span class="lbl">Completed</span></div>
+      </div>
+
+      <div class="todo-card">
+        <h2>Today's Tasks</h2>
+        <div class="add-row">
+          <input type="text" id="taskInput" placeholder="What do you need to get done?" aria-label="New task">
+          <select class="priority-select" id="prioritySelect" aria-label="Task priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+          <button class="add-btn" id="addTaskBtn">+ Add Task</button>
+        </div>
+
+        <div class="filters" role="tablist" aria-label="Filter tasks">
+          <button data-filter="all" class="active">All</button>
+          <button data-filter="active">Active</button>
+          <button data-filter="completed">Completed</button>
+        </div>
+
+        <ul class="task-list" id="taskList"></ul>
+
+        <div class="list-footer">
+          <button class="clear-btn" id="clearCompletedBtn">Clear Completed</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= POMODORO ================= -->
+  <section class="view" id="view-pomodoro">
+    <div class="page-head">
+      <h1>Find Your Focus</h1>
+      <p>One focused moment at a time.</p>
+    </div>
+
+    <div class="pomo-wrap">
+      <div class="mode-switch" role="tablist" aria-label="Pomodoro mode">
+        <button data-mode="focus" class="active">Focus</button>
+        <button data-mode="short">Short Break</button>
+        <button data-mode="long">Long Break</button>
+      </div>
+
+      <div class="focus-task-select">
+        <label for="focusTaskSelect">Focusing on</label>
+        <select id="focusTaskSelect">
+          <option value="">No task selected</option>
+        </select>
+      </div>
+
+      <div class="timer-stage">
+        <svg viewBox="0 0 200 200">
+          <circle class="timer-ring-bg" cx="100" cy="100" r="90"></circle>
+          <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="timer-center">
+          <span class="timer-label" id="timerModeLabel">Focus Time</span>
+          <span class="timer-display" id="timerDisplay">25:00</span>
+        </div>
+      </div>
+
+      <div class="pomo-controls">
+        <button class="btn btn-primary pomo-main-btn" id="startPauseBtn">Start</button>
+        <div class="pomo-sub-controls">
+          <button class="btn btn-ghost" id="resetBtn">Reset</button>
+          <button class="btn btn-ghost" id="skipBtn">Skip</button>
+        </div>
+      </div>
+
+      <div class="session-card">
+        <div class="tomatoes" id="tomatoDots">—</div>
+        <div class="count-line" id="sessionCountLine">0 sessions completed today</div>
+        <div class="time-line" id="focusTimeLine">Total focus time: 0 minutes</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BUDGET ================= -->
+  <section class="view" id="view-budget">
+    <div class="page-head">
+      <h1>Track Your Budget</h1>
+      <p>See where today's money goes, then zoom out to the whole month.</p>
+    </div>
+
+    <div class="budget-wrap">
+      <div class="mode-switch" role="tablist" aria-label="Budget period">
+        <button data-budget-period="day" class="active">Day</button>
+        <button data-budget-period="month">Month</button>
+      </div>
+
+      <!-- ---- DAY VIEW ---- -->
+      <div class="budget-period-view" id="budgetDayView">
+        <div class="date-nav">
+          <button class="icon-btn" id="prevDayBtn" aria-label="Previous day">‹</button>
+          <span class="date-label" id="currentDayLabel"></span>
+          <button class="icon-btn" id="nextDayBtn" aria-label="Next day">›</button>
+        </div>
+
+        <div class="stat-row budget-stat-row">
+          <div class="stat-card"><span class="num" id="dayIncomeNum">₹0.00</span><span class="lbl">Income</span></div>
+          <div class="stat-card"><span class="num" id="dayExpenseNum">₹0.00</span><span class="lbl">Expenses</span></div>
+          <div class="stat-card"><span class="num" id="dayBalanceNum">₹0.00</span><span class="lbl">Balance</span></div>
+        </div>
+
+        <div class="todo-card">
+          <h2>Add Entry</h2>
+
+          <div class="type-toggle" role="tablist" aria-label="Entry type">
+            <button data-type="expense" class="active">Expense</button>
+            <button data-type="income">Income</button>
+          </div>
+
+          <div class="add-row budget-add-row">
+            <input type="text" id="budgetDesc" placeholder="What was it for?" aria-label="Description">
+            <select class="priority-select" id="budgetCategory" aria-label="Category"></select>
+            <input type="number" id="budgetAmount" class="amount-input" placeholder="Amount" min="0" step="0.01" aria-label="Amount">
+            <button class="add-btn" id="addBudgetBtn">+ Add</button>
+          </div>
+
+          <ul class="task-list budget-entry-list" id="budgetEntryList"></ul>
+        </div>
+      </div>
+
+      <!-- ---- MONTH VIEW ---- -->
+      <div class="budget-period-view" id="budgetMonthView" hidden>
+        <div class="date-nav">
+          <button class="icon-btn" id="prevMonthBtn" aria-label="Previous month">‹</button>
+          <span class="date-label" id="currentMonthLabel"></span>
+          <button class="icon-btn" id="nextMonthBtn" aria-label="Next month">›</button>
+        </div>
+
+        <div class="stat-row budget-stat-row">
+          <div class="stat-card"><span class="num" id="monthIncomeNum">₹0.00</span><span class="lbl">Income</span></div>
+          <div class="stat-card"><span class="num" id="monthExpenseNum">₹0.00</span><span class="lbl">Expenses</span></div>
+          <div class="stat-card"><span class="num" id="monthBalanceNum">₹0.00</span><span class="lbl">Balance</span></div>
+        </div>
+
+        <div class="todo-card budget-goal-card">
+          <h2>Monthly Budget Goal</h2>
+          <div class="add-row">
+            <input type="number" id="monthlyGoalInput" class="amount-input" placeholder="Set a spending limit" min="0" step="0.01" aria-label="Monthly budget goal">
+            <button class="add-btn" id="setGoalBtn">Set Goal</button>
+          </div>
+          <div class="goal-progress-wrap" id="goalProgressWrap" hidden>
+            <div class="goal-progress-track"><div class="goal-progress-fill" id="goalProgressFill"></div></div>
+            <p class="goal-progress-label" id="goalProgressLabel"></p>
+          </div>
+        </div>
+
+        <div class="todo-card">
+          <h2>Spending by Category</h2>
+          <ul class="category-breakdown" id="categoryBreakdown"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="view" id="view-about">
+    <div class="page-head">
+      <h1>Why Dayora?</h1>
+    </div>
+    <div class="about-wrap">
+      <div class="about-card">
+        <p>Dayora is designed to make productivity feel lighter. Instead of overwhelming you with dashboards and numbers, Dayora gives you a calm space to plan your tasks, focus deeply, take meaningful breaks, and keep an eye on your budget.</p>
+      </div>
+      <div class="about-philosophy">
+        PLAN LIKE THE WIND.<br>FOCUS LIKE THE SKY.<br>REST LIKE A CLOUD.
+      </div>
+      <div class="about-clouds">☁ ☁ ☁</div>
+      <div class="about-brand">DAYORA</div>
+    </div>
+  </section>
+
+  <footer class="sky-foot">Dayora — a peaceful productivity space above the clouds.</footer>
+</div>
+
+<!-- Completion toast -->
+<div class="completion-toast" id="completionToast">
+  <h4 id="toastTitle">☁ Focus Complete</h4>
+  <p id="toastBody">Beautiful work. Time for a short break.</p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
