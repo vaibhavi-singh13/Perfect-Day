@@ -83,6 +83,158 @@ hamburger.addEventListener("click", () => {
 });
 
 /* ============================================================
+   SCROLL-TO-ADVANCE TAB NAVIGATION
+   Each tab is really its own full page rather than one long
+   scrolling document, so "scroll to the bottom and keep going"
+   is simulated — Telegram-pull-to-refresh style: pulling past the
+   bottom meets real, growing resistance, a small ring indicator
+   fills up to show how close you are, and if you ease off before
+   it's full the whole thing relaxes back to nothing instead of
+   firing. Only a full, sustained pull commits to the next tab.
+   ============================================================ */
+(function setupScrollAdvance(){
+  const THRESHOLD = 520;       // total "pulled" units needed to commit — tune to taste
+  const RESIST_SOFTEN = 70;    // higher = resistance ramps up more gently at first
+  const IDLE_RELAX_MS = 70;    // how soon (ms) with no input before it starts relaxing back
+  const RELAX_RATE = 1400;     // units/sec the pull relaxes back by when idle
+  const COOLDOWN_MS = 750;     // ignore input briefly right after a committed switch
+  const PULL_VISUAL_MAX = 16;  // px the page itself nudges up at full pull (subtle)
+
+  let pulled = 0;
+  let cooling = false;
+  let lastInputTs = 0;
+
+  const appEl = document.querySelector(".app");
+
+  const indicator = document.createElement("div");
+  indicator.className = "scroll-advance-indicator";
+  indicator.innerHTML = `
+    <svg class="sai-ring" viewBox="0 0 44 44" aria-hidden="true">
+      <circle class="sai-ring-bg" cx="22" cy="22" r="19"></circle>
+      <circle class="sai-ring-fill" cx="22" cy="22" r="19"></circle>
+    </svg>
+    <span class="sai-chevron" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"></path></svg>
+    </span>
+  `;
+  document.body.appendChild(indicator);
+  const ringFill = indicator.querySelector(".sai-ring-fill");
+  const RING_CIRC = 2 * Math.PI * 19;
+  ringFill.style.strokeDasharray = String(RING_CIRC);
+  ringFill.style.strokeDashoffset = String(RING_CIRC);
+
+  function currentViewName(){
+    const active = document.querySelector(".view.active");
+    return active ? active.id.replace("view-", "") : null;
+  }
+  function scrollableEl(){
+    return document.scrollingElement || document.documentElement;
+  }
+  function isAtBottom(){
+    const el = scrollableEl();
+    return el.scrollTop + window.innerHeight >= el.scrollHeight - 4;
+  }
+
+  function render(){
+    const progress = Math.min(1, pulled / THRESHOLD);
+    const showing = progress > 0.03 && !cooling;
+    indicator.classList.toggle("visible", showing);
+    indicator.classList.toggle("ready", progress >= 1);
+    ringFill.style.strokeDashoffset = String(RING_CIRC * (1 - progress));
+    indicator.style.setProperty("--sai-progress", progress.toFixed(3));
+    if(appEl){
+      appEl.style.transform = showing ? `translateY(${-progress * PULL_VISUAL_MAX}px)` : "";
+    }
+  }
+
+  function resetPull(){
+    pulled = 0;
+    render();
+  }
+
+  function commit(){
+    cooling = true;
+    const name = currentViewName();
+    const idx = validViewNames.indexOf(name);
+    indicator.classList.add("committed");
+    setTimeout(() => {
+      indicator.classList.remove("visible", "ready", "committed");
+      pulled = 0;
+      if(appEl){ appEl.style.transform = ""; }
+      if(idx > -1 && idx < validViewNames.length - 1){
+        goTo(validViewNames[idx + 1]);
+      }
+      setTimeout(() => { cooling = false; }, COOLDOWN_MS);
+    }, 240);
+  }
+
+  // A wheel notch or touch-move delta adds less the further you've already
+  // pulled — like stretching an elastic band. It never truly maxes out, but
+  // takes real, sustained effort to reach the threshold instead of one flick.
+  function addPull(rawDelta){
+    if(cooling) return;
+    lastInputTs = performance.now();
+    const resistance = 1 / (1 + pulled / RESIST_SOFTEN);
+    pulled += rawDelta * resistance;
+    render();
+    if(pulled >= THRESHOLD){
+      commit();
+    }
+  }
+
+  function relaxPull(amount){
+    if(pulled <= 0) return;
+    pulled = Math.max(0, pulled - amount);
+    render();
+  }
+
+  // Continuously relax the pull back to zero once input stops, so a partial
+  // pull that isn't followed through springs back rather than lingering.
+  let lastFrameTs = null;
+  function relaxLoop(ts){
+    if(lastFrameTs === null) lastFrameTs = ts;
+    const dt = ts - lastFrameTs;
+    lastFrameTs = ts;
+    if(!cooling && pulled > 0 && (performance.now() - lastInputTs) > IDLE_RELAX_MS){
+      relaxPull((RELAX_RATE * dt) / 1000);
+    }
+    requestAnimationFrame(relaxLoop);
+  }
+  requestAnimationFrame(relaxLoop);
+
+  // Desktop / trackpad
+  window.addEventListener("wheel", (e) => {
+    if(cooling) return;
+    if(e.deltaY > 0 && isAtBottom()){
+      addPull(e.deltaY);
+    } else if(e.deltaY < 0){
+      relaxPull(Math.abs(e.deltaY) * 1.5);
+    }
+  }, {passive:true});
+
+  // Touch (mobile swipe-up while already at the bottom)
+  let touchY = null;
+  window.addEventListener("touchstart", (e) => {
+    touchY = e.touches[0].clientY;
+  }, {passive:true});
+  window.addEventListener("touchmove", (e) => {
+    if(cooling || touchY === null) return;
+    const y = e.touches[0].clientY;
+    const delta = touchY - y; // positive: finger moving up the screen = scrolling down
+    touchY = y;
+    if(delta > 0 && isAtBottom()){
+      addPull(delta);
+    } else if(delta < 0){
+      relaxPull(Math.abs(delta) * 1.5);
+    }
+  }, {passive:true});
+  window.addEventListener("touchend", () => { touchY = null; });
+
+  // Clear any in-progress pull if the user navigates by tapping a tab directly.
+  navButtons.forEach(btn => btn.addEventListener("click", resetPull));
+})();
+
+/* ============================================================
    SCROLL REVEAL
    ============================================================ */
 const revealTargets = document.querySelectorAll(".reveal-target, .feature-card");

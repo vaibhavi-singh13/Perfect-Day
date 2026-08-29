@@ -941,6 +941,78 @@ a{color:inherit;}
    ============================================================ */
 footer.sky-foot{text-align:center; color:var(--hero-text-faint); font-size:0.82rem; padding:30px 0 10px;}
 
+/* ============================================================
+   SCROLL-TO-ADVANCE INDICATOR
+   Small pull-to-refresh-style ring that fills up as you keep
+   scrolling past the bottom of a tab, hinting that continuing
+   will carry you into the next one.
+   ============================================================ */
+.app{ transition: transform .35s var(--ease); }
+
+.scroll-advance-indicator{
+  position:fixed;
+  left:50%; bottom:28px;
+  width:44px; height:44px;
+  transform:translate(-50%, 14px) scale(0.82);
+  opacity:0;
+  pointer-events:none;
+  z-index:150;
+  transition:opacity .25s ease, transform .25s ease;
+}
+.scroll-advance-indicator.visible{
+  opacity:1;
+  transform:translate(-50%, 0) scale(1);
+}
+.scroll-advance-indicator.committed{
+  animation:saiCommit .24s ease forwards;
+}
+@keyframes saiCommit{
+  0%{ transform:translate(-50%,0) scale(1); }
+  55%{ transform:translate(-50%,0) scale(1.22); }
+  100%{ transform:translate(-50%,0) scale(0.86); opacity:0; }
+}
+
+.sai-ring{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  transform:rotate(-90deg);
+}
+.sai-ring-bg{
+  fill:var(--card-bg-strong);
+  stroke:var(--card-border);
+  stroke-width:2;
+  filter:drop-shadow(0 6px 14px rgba(6,60,110,0.2));
+}
+.sai-ring-fill{
+  fill:none;
+  stroke:var(--soft-text);
+  stroke-width:3;
+  stroke-linecap:round;
+  transition:stroke .2s ease;
+}
+.scroll-advance-indicator.ready .sai-ring-fill{
+  stroke:var(--bright-blue);
+}
+
+.sai-chevron{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--soft-text);
+  transform:translateY(calc((1 - var(--sai-progress, 0)) * 5px));
+  transition:color .2s ease;
+}
+.sai-chevron svg{
+  width:18px; height:18px;
+  fill:none; stroke:currentColor; stroke-width:2.6;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+.scroll-advance-indicator.ready .sai-chevron{
+  color:var(--deep-sky);
+}
+[data-theme="dark"] .scroll-advance-indicator.ready .sai-chevron{
+  color:var(--bright-blue);
+}
+
 /* Reveal-on-scroll base */
 .reveal-target{opacity:0; transform:translateY(35px); transition:opacity .8s ease, transform .8s ease;}
 .reveal-target.reveal{opacity:1; transform:translateY(0);}
