@@ -1406,4 +1406,174 @@ function renderCategoryBreakdown(){
 populateCategorySelect(currentEntryType);
 renderDayView();
 
+/* ============================================================
+   CALENDAR
+   ============================================================ */
+const CALENDAR_EVENTS_KEY = "dayoraCalendarEvents";
+
+function loadCalendarEvents(){
+  try{
+    const raw = localStorage.getItem(CALENDAR_EVENTS_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch(e){ return []; }
+}
+function saveCalendarEvents(){
+  try{ localStorage.setItem(CALENDAR_EVENTS_KEY, JSON.stringify(calendarEvents)); } catch(e){ /* storage unavailable */ }
+}
+
+let calendarEvents = loadCalendarEvents();
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let calendarSelectedDate = dateKey(new Date());
+
+const calPrevMonthBtn = document.getElementById("calPrevMonthBtn");
+const calNextMonthBtn = document.getElementById("calNextMonthBtn");
+const calMonthLabel = document.getElementById("calMonthLabel");
+const calendarGrid = document.getElementById("calendarGrid");
+const calSelectedDateLabel = document.getElementById("calSelectedDateLabel");
+const calEventTime = document.getElementById("calEventTime");
+const calEventInput = document.getElementById("calEventInput");
+const calAddEventBtn = document.getElementById("calAddEventBtn");
+const calEventList = document.getElementById("calEventList");
+
+function calendarUid(){ return "c" + Date.now() + Math.floor(Math.random()*1000); }
+
+calPrevMonthBtn.addEventListener("click", () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+  renderCalendarGrid();
+});
+calNextMonthBtn.addEventListener("click", () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+  renderCalendarGrid();
+});
+
+function formatSelectedDateLabel(key){
+  const [y,m,d] = key.split("-").map(Number);
+  const dateObj = new Date(y, m-1, d);
+  const isToday = key === dateKey(new Date());
+  const str = dateObj.toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"long" });
+  return isToday ? `Today · ${str}` : str;
+}
+
+function renderCalendarGrid(){
+  calMonthLabel.textContent = calendarMonth.toLocaleDateString(undefined, { month:"long", year:"numeric" });
+
+  // remove previously injected day cells but keep the 7 weekday headers
+  calendarGrid.querySelectorAll(".calendar-day").forEach(el => el.remove());
+
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayKey = dateKey(new Date());
+
+  for(let i=0; i<firstDow; i++){
+    const empty = document.createElement("span");
+    empty.className = "calendar-day empty";
+    calendarGrid.appendChild(empty);
+  }
+
+  for(let day=1; day<=daysInMonth; day++){
+    const dObj = new Date(year, month, day);
+    const key = dateKey(dObj);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "calendar-day";
+    if(key === todayKey) btn.classList.add("today");
+    if(key === calendarSelectedDate) btn.classList.add("selected");
+    btn.setAttribute("aria-label", dObj.toDateString());
+    btn.textContent = day;
+
+    if(calendarEvents.some(e => e.date === key)){
+      const dot = document.createElement("span");
+      dot.className = "cal-dot";
+      btn.appendChild(dot);
+    }
+
+    btn.addEventListener("click", () => {
+      calendarSelectedDate = key;
+      renderCalendarGrid();
+      renderCalendarEventList();
+    });
+
+    calendarGrid.appendChild(btn);
+  }
+}
+
+function addCalendarEvent(){
+  const title = calEventInput.value.trim();
+  if(!title) return;
+  calendarEvents.push({
+    id: calendarUid(),
+    date: calendarSelectedDate,
+    time: calEventTime.value || "",
+    title
+  });
+  calEventInput.value = "";
+  calEventTime.value = "";
+  saveCalendarEvents();
+  renderCalendarGrid();
+  renderCalendarEventList();
+  calEventInput.focus();
+}
+calAddEventBtn.addEventListener("click", addCalendarEvent);
+calEventInput.addEventListener("keydown", e => { if(e.key === "Enter") addCalendarEvent(); });
+
+function deleteCalendarEvent(id){
+  const el = calEventList.querySelector(`[data-id="${id}"]`);
+  const finish = () => {
+    calendarEvents = calendarEvents.filter(e => e.id !== id);
+    saveCalendarEvents();
+    renderCalendarGrid();
+    renderCalendarEventList();
+  };
+  if(el){
+    el.classList.add("removing");
+    setTimeout(finish, 280);
+  } else {
+    finish();
+  }
+}
+
+function renderCalendarEventList(){
+  calSelectedDateLabel.textContent = formatSelectedDateLabel(calendarSelectedDate);
+
+  const entries = calendarEvents
+    .filter(e => e.date === calendarSelectedDate)
+    .sort((a,b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+
+  calEventList.innerHTML = "";
+
+  if(entries.length === 0){
+    calEventList.innerHTML = `
+      <div class="empty-state">
+        <span class="emoji">✦</span>
+        <h3>Nothing on the calendar</h3>
+        <p>Add an event for this day above.</p>
+      </div>`;
+    return;
+  }
+
+  entries.forEach(e => {
+    const li = document.createElement("li");
+    li.className = "task-item";
+    li.dataset.id = e.id;
+    li.innerHTML = `
+      <div class="task-main">
+        <span class="task-title">${escapeHtml(e.title)}</span>
+        ${e.time ? `<span class="entry-meta">${escapeHtml(e.time)}</span>` : ""}
+      </div>
+      <div class="task-actions">
+        <button class="icon-btn danger delete-cal-btn" aria-label="Delete event" title="Delete">🗑</button>
+      </div>
+    `;
+    li.querySelector(".delete-cal-btn").addEventListener("click", () => deleteCalendarEvent(e.id));
+    calEventList.appendChild(li);
+  });
+}
+
+renderCalendarGrid();
+renderCalendarEventList();
+
 })();

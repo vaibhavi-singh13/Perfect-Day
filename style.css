@@ -548,6 +548,16 @@ a{color:inherit;}
   transition:border-color .2s ease, background 0.7s var(--ease), color 0.4s var(--ease);
 }
 .add-row input[type=text]:focus{border-color:var(--bright-blue);}
+.add-row input[type=time]{
+  flex:0 0 130px;
+  padding:15px 16px; border-radius:999px;
+  border:2px solid var(--input-border);
+  font-size:0.92rem; color:var(--deep-text);
+  background:var(--input-bg);
+  outline:none;
+  transition:border-color .2s ease, background 0.7s var(--ease), color 0.4s var(--ease);
+}
+.add-row input[type=time]:focus{border-color:var(--bright-blue);}
 .priority-select{
   padding:0 16px; border-radius:999px;
   border:2px solid var(--input-border);
@@ -916,6 +926,73 @@ a{color:inherit;}
   .budget-add-row{flex-direction:column; align-items:stretch;}
   .amount-input{width:100%; flex:1 1 auto;}
   .cat-label{flex:0 0 110px; font-size:0.82rem;}
+}
+
+/* ============================================================
+   CALENDAR VIEW
+   ============================================================ */
+.calendar-wrap{
+  max-width:720px; margin:0 auto;
+  display:flex; flex-direction:column; gap:26px;
+  text-align:left;
+}
+.calendar-card{padding:26px;}
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.calendar-dow{
+  text-align:center;
+  font-size:0.7rem;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--soft-text);
+  padding-bottom:10px;
+}
+.calendar-day{
+  position:relative;
+  aspect-ratio:1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg);
+  color:var(--deep-text);
+  font-weight:700;
+  font-size:0.92rem;
+  padding:0;
+  transition:background .2s ease, color .2s ease, transform .2s ease, border-color .2s ease;
+}
+.calendar-day:hover{background:var(--very-light-blue); transform:translateY(-2px);}
+.calendar-day.empty{
+  background:transparent;
+  border:none;
+  pointer-events:none;
+}
+.calendar-day.today{border-color:var(--bright-blue); color:var(--deep-sky); font-weight:800;}
+.calendar-day.selected{
+  background:linear-gradient(135deg,var(--primary-sky),var(--bright-blue));
+  color:#fff;
+  border-color:transparent;
+}
+[data-theme="dark"] .calendar-day.selected{color:#0b1638;}
+.calendar-day .cal-dot{
+  position:absolute;
+  bottom:6px;
+  width:5px; height:5px;
+  border-radius:50%;
+  background:var(--gold);
+}
+.calendar-day.selected .cal-dot{background:#fff;}
+
+@media (max-width:480px){
+  .calendar-grid{gap:4px;}
+  .calendar-day{font-size:0.82rem; border-radius:10px;}
+  .calendar-dow{font-size:0.6rem;}
 }
 
 /* ============================================================

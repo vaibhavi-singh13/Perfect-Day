@@ -26,6 +26,7 @@
       <li><button data-nav="pomodoro">Pomodoro</button></li>
       <li><button data-nav="activity">Timer</button></li>
       <li><button data-nav="budget">Budget</button></li>
+      <li><button data-nav="calendar">Calendar</button></li>
       <li><button data-nav="about">About</button></li>
     </ul>
     <button class="theme-toggle" aria-pressed="false" aria-label="Switch to night sky" title="Toggle day / night sky">
@@ -42,6 +43,7 @@
   <button data-nav="pomodoro">Pomodoro</button>
   <button data-nav="activity">Timer</button>
   <button data-nav="budget">Budget</button>
+  <button data-nav="calendar">Calendar</button>
   <button data-nav="about">About</button>
   <div class="mm-theme-row">
     <span class="theme-toggle-label">Day Sky</span>
@@ -91,6 +93,12 @@
           <h3>Budget</h3>
           <p>Track today's spending and see the bigger picture across the month.</p>
           <button class="btn btn-primary" data-nav="budget">View Budget</button>
+        </div>
+        <div class="feature-card reveal-target">
+          <span class="icon">🗓</span>
+          <h3>Calendar</h3>
+          <p>See your month at a glance and keep upcoming plans in view.</p>
+          <button class="btn btn-primary" data-nav="calendar">View Calendar</button>
         </div>
       </div>
     </div>
@@ -318,6 +326,43 @@
     </div>
   </section>
 
+  <!-- ================= CALENDAR ================= -->
+  <section class="view" id="view-calendar">
+    <div class="page-head">
+      <h1>Your Calendar</h1>
+    </div>
+
+    <div class="calendar-wrap">
+      <div class="date-nav">
+        <button class="icon-btn" id="calPrevMonthBtn" aria-label="Previous month">‹</button>
+        <span class="date-label" id="calMonthLabel"></span>
+        <button class="icon-btn" id="calNextMonthBtn" aria-label="Next month">›</button>
+      </div>
+
+      <div class="todo-card calendar-card">
+        <div class="calendar-grid" id="calendarGrid">
+          <span class="calendar-dow">Sun</span>
+          <span class="calendar-dow">Mon</span>
+          <span class="calendar-dow">Tue</span>
+          <span class="calendar-dow">Wed</span>
+          <span class="calendar-dow">Thu</span>
+          <span class="calendar-dow">Fri</span>
+          <span class="calendar-dow">Sat</span>
+        </div>
+      </div>
+
+      <div class="todo-card">
+        <h2 id="calSelectedDateLabel">Today</h2>
+        <div class="add-row">
+          <input type="time" id="calEventTime" aria-label="Event time (optional)">
+          <input type="text" id="calEventInput" placeholder="Add an event for this day..." aria-label="New event">
+          <button class="add-btn" id="calAddEventBtn">+ Add</button>
+        </div>
+        <ul class="task-list" id="calEventList"></ul>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= ABOUT ================= -->
   <section class="view" id="view-about">
     <div class="page-head">
@@ -330,7 +375,6 @@
       <div class="about-philosophy">
         PLAN LIKE THE WIND.<br>FOCUS LIKE THE SKY.<br>REST LIKE A CLOUD.
       </div>
-      <div class="about-clouds">☁ ☁ ☁</div>
       <div class="about-brand">DAYORA</div>
     </div>
   </section>
