@@ -60,6 +60,14 @@
 
   --income-color:#2E9860;
   --expense-color:#D9534F;
+
+  --plant-ground:rgba(255,255,255,0.4);
+  --plant-mound:rgba(201,138,66,0.5);
+  --plant-stem:#3FA85C;
+  --plant-leaf:#4CBE6C;
+  --plant-seed:#8A5A2C;
+  --plant-flower-petal:#FFD3E0;
+  --plant-flower-center:#F2A93C;
 }
 
 /* ================= DARK THEME (night sky) ================= */
@@ -108,6 +116,14 @@
 
   --income-color:#4CC98D;
   --expense-color:#E5766D;
+
+  --plant-ground:rgba(159,199,242,0.22);
+  --plant-mound:rgba(138,90,44,0.55);
+  --plant-stem:#5FCB80;
+  --plant-leaf:#6FDB8F;
+  --plant-seed:#B9884F;
+  --plant-flower-petal:#F5B8CE;
+  --plant-flower-center:#F2C879;
 }
 
 *{box-sizing:border-box;}
@@ -458,7 +474,7 @@ a{color:inherit;}
 }
 
 .overview{max-width:1000px; margin:120px auto 0; position:relative;}
-.feature-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+.feature-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:28px;}
 @media (max-width:920px){ .feature-grid{grid-template-columns:1fr 1fr;} }
 @media (max-width:600px){ .feature-grid{grid-template-columns:1fr;} }
 
@@ -487,15 +503,18 @@ a{color:inherit;}
 /* ============================================================
    SHARED PAGE HEADER
    ============================================================ */
-.page-head{text-align:center; max-width:640px; margin:0 auto 50px;}
+.page-head{text-align:center; max-width:640px; margin:0 auto 60px;}
 .page-head h1{color:var(--hero-text); font-size:clamp(2.1rem,5vw,3.4rem); font-weight:800; margin:0 0 12px; text-shadow:var(--shadow-text);}
 .page-head p{color:var(--hero-text-soft); font-size:1.08rem; margin:0;}
 
 /* ============================================================
    TASKS VIEW
    ============================================================ */
-.tasks-wrap{max-width:720px; margin:0 auto;}
-.stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:26px;}
+.tasks-wrap{
+  max-width:720px; margin:0 auto;
+  display:flex; flex-direction:column; gap:30px;
+}
+.stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
 .stat-card{
   background:var(--card-bg);
   backdrop-filter:blur(12px);
@@ -620,7 +639,7 @@ a{color:inherit;}
 /* ============================================================
    POMODORO VIEW
    ============================================================ */
-.pomo-wrap{max-width:560px; margin:0 auto; text-align:center;}
+.pomo-wrap{max-width:640px; margin:0 auto; text-align:center;}
 .mode-switch{
   display:inline-flex; gap:6px;
   background:rgba(255,255,255,0.15);
@@ -635,7 +654,7 @@ a{color:inherit;}
 }
 .mode-switch button.active{background:var(--card-bg-strong); box-shadow:0 8px 18px rgba(6,70,130,0.2); color:var(--deep-sky);}
 
-.focus-task-select{margin-bottom:26px;}
+.focus-task-select{margin-bottom:34px;}
 .focus-task-select label{
   display:block; font-size:0.75rem; font-weight:800; letter-spacing:1.5px;
   color:var(--hero-text-faint); margin-bottom:8px; text-transform:uppercase;
@@ -646,7 +665,13 @@ a{color:inherit;}
   font-weight:700; font-size:0.95rem;
 }
 
-.timer-stage{position:relative; width:min(320px,72vw); height:min(320px,72vw); margin:0 auto 34px;}
+.timer-plant-row{
+  display:flex; align-items:center; justify-content:center;
+  gap:36px; flex-wrap:wrap;
+  margin-bottom:34px;
+}
+
+.timer-stage{position:relative; width:min(280px,62vw); height:min(280px,62vw); flex-shrink:0;}
 .timer-stage svg{width:100%;height:100%; transform:rotate(-90deg);}
 .timer-ring-bg{fill:none; stroke:rgba(255,255,255,0.24); stroke-width:14;}
 .timer-ring{fill:none; stroke:var(--hero-text); stroke-width:14; stroke-linecap:round; transition:stroke-dashoffset .3s ease;}
@@ -657,6 +682,41 @@ a{color:inherit;}
   font-size:clamp(2.6rem,10vw,3.6rem); font-weight:700;
   text-shadow:var(--shadow-text);
   font-variant-numeric:tabular-nums;
+}
+
+/* ---- growing plant companion ---- */
+.plant-stage{
+  width:min(200px,50vw);
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  flex-shrink:0;
+}
+#plantSvg{width:100%; height:auto; overflow:visible;}
+.plant-ground{stroke:var(--plant-ground); stroke-width:3; stroke-linecap:round; transition:stroke 0.7s var(--ease);}
+.plant-mound{fill:var(--plant-mound); transition:fill 0.7s var(--ease);}
+.plant-seed{fill:var(--plant-seed); transition:opacity .5s ease, fill 0.7s var(--ease);}
+.plant-stem{
+  fill:none; stroke:var(--plant-stem); stroke-width:6; stroke-linecap:round;
+  transition:stroke-dashoffset .6s ease, stroke 0.7s var(--ease);
+}
+.plant-leaf{
+  fill:var(--plant-leaf);
+  transition:transform .6s var(--ease), fill 0.7s var(--ease);
+  transform:scale(0);
+}
+.plant-leaf-left{transform-origin:100px 158px;}
+.plant-leaf-right{transform-origin:100px 130px;}
+.plant-flower{
+  transform:scale(0);
+  transform-origin:100px 72px;
+  opacity:0;
+  transition:transform .7s var(--ease), opacity .7s ease;
+}
+.plant-flower .flower-petal{fill:var(--plant-flower-petal);}
+.plant-flower .flower-center{fill:var(--plant-flower-center);}
+.plant-caption{
+  margin:0; font-size:0.82rem; font-weight:700;
+  color:var(--hero-text-soft); text-align:center;
+  min-height:2.4em; display:flex; align-items:center; justify-content:center;
 }
 
 .pomo-controls{display:flex; flex-direction:column; align-items:center; gap:16px; margin-bottom:36px;}
@@ -691,16 +751,70 @@ a{color:inherit;}
 .completion-toast h4{margin:0 0 6px; color:var(--deep-text); font-size:1.1rem;}
 .completion-toast p{margin:0; color:var(--soft-text); font-size:0.9rem;}
 
+@media (max-width:640px){
+  .timer-plant-row{gap:24px;}
+  .plant-stage{width:min(160px,44vw);}
+}
+
+/* ============================================================
+   ACTIVITY VIEW
+   ============================================================ */
+.activity-wrap{
+  max-width:720px; margin:0 auto;
+  display:flex; flex-direction:column; gap:30px;
+}
+.activity-timer-card .add-row{margin-bottom:0;}
+#activityIdleRow[hidden],
+#activityRunningRow[hidden]{
+  display:none;
+}
+.activity-running{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:space-between;
+}
+.activity-running-info{display:flex; align-items:center; gap:10px; flex:1; min-width:160px;}
+.activity-status-dot{
+  width:12px; height:12px; border-radius:50%; flex-shrink:0;
+  background:var(--expense-color);
+  animation:activityPulse 1.6s ease-in-out infinite;
+}
+@keyframes activityPulse{
+  0%{box-shadow:0 0 0 0 rgba(217,83,79,0.5);}
+  70%{box-shadow:0 0 0 10px rgba(217,83,79,0);}
+  100%{box-shadow:0 0 0 0 rgba(217,83,79,0);}
+}
+.activity-running-name{font-weight:800; color:var(--deep-text); font-size:1.05rem; word-break:break-word;}
+.activity-elapsed{
+  font-family:var(--font-display); font-size:1.7rem; font-weight:700;
+  color:var(--deep-sky); font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.activity-stop-btn{padding:12px 26px; font-size:0.9rem; flex-shrink:0;}
+
+.activity-entry-list{margin-top:4px;}
+.activity-entry-name{display:block; font-weight:700; color:var(--deep-text); font-size:1rem; word-break:break-word;}
+.activity-entry-meta{display:block; font-size:0.78rem; color:var(--soft-text); margin-top:3px;}
+.activity-entry-duration{
+  font-weight:800; font-family:var(--font-display); font-size:1.05rem;
+  color:var(--deep-sky); flex-shrink:0; white-space:nowrap;
+}
+
+@media (max-width:600px){
+  .activity-running{flex-direction:column; align-items:stretch; text-align:center;}
+  .activity-running-info{justify-content:center;}
+}
+
 /* ============================================================
    BUDGET VIEW
    ============================================================ */
 .budget-wrap{max-width:720px; margin:0 auto; text-align:center;}
 .budget-wrap .mode-switch{margin-bottom:30px;}
-.budget-period-view{text-align:left;}
+.budget-period-view{
+  text-align:left;
+  display:flex; flex-direction:column; gap:26px;
+}
 
 .date-nav{
   display:flex; align-items:center; justify-content:center; gap:18px;
-  margin:0 0 24px;
+  margin:0;
 }
 .date-nav .icon-btn{
   width:42px; height:42px;
@@ -717,7 +831,7 @@ a{color:inherit;}
   text-shadow:var(--shadow-text);
 }
 
-.budget-stat-row{margin-bottom:24px;}
+.budget-stat-row{margin:0;}
 
 .type-toggle{
   display:inline-flex; gap:6px;
@@ -760,7 +874,7 @@ a{color:inherit;}
 .entry-amount.income{color:var(--income-color);}
 .entry-amount.expense{color:var(--expense-color);}
 
-.budget-goal-card{margin-bottom:24px;}
+.budget-goal-card{margin:0;}
 .goal-progress-wrap{margin-top:18px;}
 .goal-progress-track{
   width:100%; height:14px; border-radius:999px;
@@ -797,8 +911,8 @@ a{color:inherit;}
   backdrop-filter:blur(15px);
   border:1px solid var(--card-border);
   border-radius:var(--radius-xl);
-  box-shadow:var(--card-shadow);
   padding:44px 34px; margin-bottom:60px;
+  box-shadow:var(--card-shadow);
   transition:background 0.7s var(--ease), border-color 0.7s var(--ease);
 }
 .about-card p{color:var(--soft-text); font-size:1.08rem; line-height:1.75; margin:0;}

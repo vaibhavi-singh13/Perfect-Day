@@ -46,14 +46,30 @@ const navButtons = document.querySelectorAll("[data-nav]");
 const mobileMenu = document.getElementById("mobileMenu");
 const hamburger = document.getElementById("hamburger");
 
+const VIEW_KEY = "dayoraCurrentView";
+const validViewNames = Array.from(views).map(v => v.id.replace("view-",""));
+
 function goTo(name){
   views.forEach(v => v.classList.toggle("active", v.id === "view-" + name));
   navButtons.forEach(b => b.classList.toggle("active", b.dataset.nav === name));
   closeMobileMenu();
   window.scrollTo({top:0, behavior:"smooth"});
   triggerReveal();
+  try{ localStorage.setItem(VIEW_KEY, name); } catch(e){ /* ignore */ }
 }
 navButtons.forEach(btn => btn.addEventListener("click", () => goTo(btn.dataset.nav)));
+
+// Restore whichever page was open before the reload, instead of always
+// snapping back to Home. The markup already defaults to Home, so this
+// only needs to act when a different page was saved.
+(function restoreView(){
+  let saved = null;
+  try{ saved = localStorage.getItem(VIEW_KEY); } catch(e){ /* ignore */ }
+  if(saved && saved !== "home" && validViewNames.includes(saved)){
+    views.forEach(v => v.classList.toggle("active", v.id === "view-" + saved));
+    navButtons.forEach(b => b.classList.toggle("active", b.dataset.nav === saved));
+  }
+})();
 
 function closeMobileMenu(){
   mobileMenu.classList.remove("open");
@@ -523,6 +539,57 @@ const toastBody = document.getElementById("toastBody");
 const RING_CIRCUMFERENCE = 2 * Math.PI * 90;
 timerRing.setAttribute("stroke-dasharray", RING_CIRCUMFERENCE);
 
+/* ---- Growing plant companion ----
+   The plant grows from a seed to full bloom over the course of
+   whichever session is currently running (25 min focus by default,
+   or the shorter break durations). Progress is derived straight from
+   the timer's own countdown, so it always stays perfectly in sync
+   with the ring and needs no timer of its own. */
+const plantStem = document.getElementById("plantStem");
+const plantSeed = document.getElementById("plantSeed");
+const plantLeafLeft = document.getElementById("plantLeafLeft");
+const plantLeafRight = document.getElementById("plantLeafRight");
+const plantFlower = document.getElementById("plantFlower");
+const plantCaption = document.getElementById("plantCaption");
+
+const stemLength = plantStem.getTotalLength();
+plantStem.style.strokeDasharray = stemLength;
+
+function clamp01(n){ return Math.max(0, Math.min(1, n)); }
+// Maps progress from [start,end] onto [0,1], clamped.
+function stageProgress(progress, start, end){ return clamp01((progress - start) / (end - start)); }
+
+function updatePlant(progress){
+  const seedFade = 1 - stageProgress(progress, 0, 0.1);
+  plantSeed.style.opacity = seedFade;
+
+  const stemGrowth = stageProgress(progress, 0.04, 0.55);
+  plantStem.style.strokeDashoffset = stemLength * (1 - stemGrowth);
+
+  const leafLeftGrowth = stageProgress(progress, 0.35, 0.55);
+  plantLeafLeft.style.transform = `scale(${leafLeftGrowth})`;
+
+  const leafRightGrowth = stageProgress(progress, 0.52, 0.72);
+  plantLeafRight.style.transform = `scale(${leafRightGrowth})`;
+
+  const flowerGrowth = stageProgress(progress, 0.8, 1);
+  plantFlower.style.transform = `scale(${flowerGrowth})`;
+  plantFlower.style.opacity = flowerGrowth;
+
+  if(plantCaption){
+    let caption;
+    if(progress <= 0.01) caption = "Plant a seed and watch it grow as you focus";
+    else if(progress < 0.1) caption = "A tiny seed, waiting to sprout";
+    else if(progress < 0.55) caption = "Pushing up through the soil";
+    else if(progress < 0.8) caption = "Unfurling its leaves";
+    else if(progress < 1) caption = "About to bloom";
+    else caption = "In full bloom — session complete!";
+    plantCaption.textContent = caption;
+  }
+}
+
+updatePlant(0);
+
 function renderFocusTaskOptions(){
   const activeOnes = tasks.filter(t => !t.completed);
   const prevValue = focusTaskSelect.value;
@@ -547,6 +614,7 @@ function updateTimerUI(){
   const total = DURATIONS[pomoState.mode];
   const progress = pomoState.secondsLeft / total;
   timerRing.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - progress);
+  updatePlant(1 - progress);
 
   startPauseBtn.textContent = pomoState.running ? "Pause" : (pomoState.secondsLeft === total ? "Start" : "Resume");
 
@@ -646,6 +714,218 @@ function completeSession(isSkip){
 
 updateTimerUI();
 triggerReveal();
+
+/* ============================================================
+   ACTIVITY TRACKER
+   ============================================================ */
+const ACTIVITY_ENTRIES_KEY = "dayoraActivityEntries";
+const ACTIVITY_RUNNING_KEY = "dayoraActivityRunning";
+
+function loadActivityEntries(){
+  try{
+    const raw = localStorage.getItem(ACTIVITY_ENTRIES_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch(e){ return []; }
+}
+function saveActivityEntries(){
+  try{ localStorage.setItem(ACTIVITY_ENTRIES_KEY, JSON.stringify(activityEntries)); } catch(e){ /* storage unavailable */ }
+}
+function loadRunningActivity(){
+  try{
+    const raw = localStorage.getItem(ACTIVITY_RUNNING_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    return (parsed && parsed.startTs) ? parsed : null;
+  } catch(e){ return null; }
+}
+function saveRunningActivity(){
+  try{
+    if(runningActivity){
+      localStorage.setItem(ACTIVITY_RUNNING_KEY, JSON.stringify(runningActivity));
+    } else {
+      localStorage.removeItem(ACTIVITY_RUNNING_KEY);
+    }
+  } catch(e){ /* ignore */ }
+}
+
+let activityEntries = loadActivityEntries();
+let runningActivity = loadRunningActivity();
+let activityIntervalId = null;
+
+const activityNameInput = document.getElementById("activityNameInput");
+const activityStartBtn = document.getElementById("activityStartBtn");
+const activityStopBtn = document.getElementById("activityStopBtn");
+const activityIdleRow = document.getElementById("activityIdleRow");
+const activityRunningRow = document.getElementById("activityRunningRow");
+const activityRunningName = document.getElementById("activityRunningName");
+const activityElapsedDisplay = document.getElementById("activityElapsedDisplay");
+const activityEntryList = document.getElementById("activityEntryList");
+const activityTodayTotal = document.getElementById("activityTodayTotal");
+const activityTodayCount = document.getElementById("activityTodayCount");
+const activityAllTimeTotal = document.getElementById("activityAllTimeTotal");
+
+function activityUid(){ return "a" + Date.now() + Math.floor(Math.random()*1000); }
+
+function formatHMS(totalSeconds){
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+
+function formatDurationShort(totalSeconds){
+  const s = Math.max(0, Math.round(totalSeconds));
+  if(s < 60) return `${s}s`;
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  if(h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function activityElapsedSeconds(){
+  if(!runningActivity) return 0;
+  return (Date.now() - runningActivity.startTs) / 1000;
+}
+
+function startActivityTicker(){
+  stopActivityTicker();
+  activityIntervalId = setInterval(() => {
+    if(!runningActivity) return;
+    activityElapsedDisplay.textContent = formatHMS(activityElapsedSeconds());
+    renderActivityStats();
+  }, 1000);
+}
+function stopActivityTicker(){
+  clearInterval(activityIntervalId);
+  activityIntervalId = null;
+}
+
+function startActivity(){
+  if(runningActivity) return; // a session is already running; UI hides the start row in this case
+  const name = activityNameInput.value.trim() || "Untitled activity";
+  runningActivity = { name, startTs: Date.now() };
+  saveRunningActivity();
+  activityNameInput.value = "";
+  renderActivityUI();
+}
+
+function stopActivity(){
+  if(!runningActivity) return;
+  const endTs = Date.now();
+  const durationSec = Math.max(1, Math.round((endTs - runningActivity.startTs)/1000));
+  activityEntries.unshift({
+    id: activityUid(),
+    name: runningActivity.name,
+    date: dateKey(new Date(runningActivity.startTs)),
+    startTs: runningActivity.startTs,
+    endTs,
+    durationSec
+  });
+  saveActivityEntries();
+  runningActivity = null;
+  saveRunningActivity();
+  stopActivityTicker();
+  renderActivityUI();
+}
+
+activityStartBtn.addEventListener("click", startActivity);
+activityNameInput.addEventListener("keydown", e => { if(e.key === "Enter") startActivity(); });
+activityStopBtn.addEventListener("click", stopActivity);
+
+function deleteActivityEntry(id){
+  const el = activityEntryList.querySelector(`[data-id="${id}"]`);
+  const finish = () => {
+    activityEntries = activityEntries.filter(e => e.id !== id);
+    saveActivityEntries();
+    renderActivityUI();
+  };
+  if(el){
+    el.classList.add("removing");
+    setTimeout(finish, 280);
+  } else {
+    finish();
+  }
+}
+
+function activityTimeRangeLabel(entry){
+  const start = new Date(entry.startTs);
+  const end = new Date(entry.endTs);
+  const dayLabel = dateKey(start) === dateKey(new Date())
+    ? "Today"
+    : start.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+  const startStr = start.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+  const endStr = end.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+  return `${dayLabel} · ${startStr} – ${endStr}`;
+}
+
+function renderActivityStats(){
+  const todayKey = dateKey(new Date());
+  const todayEntries = activityEntries.filter(e => e.date === todayKey);
+  const runningIsToday = runningActivity && dateKey(new Date(runningActivity.startTs)) === todayKey;
+
+  let todaySeconds = todayEntries.reduce((s,e) => s + e.durationSec, 0);
+  if(runningIsToday) todaySeconds += activityElapsedSeconds();
+
+  const allSeconds = activityEntries.reduce((s,e) => s + e.durationSec, 0) + (runningActivity ? activityElapsedSeconds() : 0);
+
+  activityTodayTotal.textContent = formatDurationShort(todaySeconds);
+  activityTodayCount.textContent = todayEntries.length + (runningIsToday ? 1 : 0);
+  activityAllTimeTotal.textContent = formatDurationShort(allSeconds);
+}
+
+function renderActivityList(){
+  activityEntryList.innerHTML = "";
+
+  if(activityEntries.length === 0){
+    activityEntryList.innerHTML = `
+      <div class="empty-state">
+        <span class="emoji">⏱</span>
+        <h3>No activity logged yet</h3>
+        <p>Start a timer above to begin tracking your time.</p>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...activityEntries].sort((a,b) => b.startTs - a.startTs);
+  sorted.forEach(entry => {
+    const li = document.createElement("li");
+    li.className = "task-item";
+    li.dataset.id = entry.id;
+    li.innerHTML = `
+      <div class="task-main">
+        <span class="activity-entry-name">${escapeHtml(entry.name)}</span>
+        <span class="activity-entry-meta">${activityTimeRangeLabel(entry)}</span>
+      </div>
+      <span class="activity-entry-duration">${formatDurationShort(entry.durationSec)}</span>
+      <div class="task-actions">
+        <button class="icon-btn danger delete-activity-btn" aria-label="Delete entry" title="Delete">🗑</button>
+      </div>
+    `;
+    li.querySelector(".delete-activity-btn").addEventListener("click", () => deleteActivityEntry(entry.id));
+    activityEntryList.appendChild(li);
+  });
+}
+
+function renderActivityUI(){
+  if(runningActivity){
+    activityIdleRow.hidden = true;
+    activityRunningRow.hidden = false;
+    activityRunningName.textContent = runningActivity.name;
+    activityElapsedDisplay.textContent = formatHMS(activityElapsedSeconds());
+    startActivityTicker();
+  } else {
+    activityIdleRow.hidden = false;
+    activityRunningRow.hidden = true;
+    stopActivityTicker();
+  }
+  renderActivityStats();
+  renderActivityList();
+}
+
+renderActivityUI();
 
 /* ============================================================
    BUDGET

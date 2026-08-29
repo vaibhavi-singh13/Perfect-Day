@@ -24,6 +24,7 @@
       <li><button data-nav="home" class="active">Home</button></li>
       <li><button data-nav="tasks">Tasks</button></li>
       <li><button data-nav="pomodoro">Pomodoro</button></li>
+      <li><button data-nav="activity">Activity</button></li>
       <li><button data-nav="budget">Budget</button></li>
       <li><button data-nav="about">About</button></li>
     </ul>
@@ -39,6 +40,7 @@
   <button data-nav="home" class="active">Home</button>
   <button data-nav="tasks">Tasks</button>
   <button data-nav="pomodoro">Pomodoro</button>
+  <button data-nav="activity">Activity</button>
   <button data-nav="budget">Budget</button>
   <button data-nav="about">About</button>
   <div class="mm-theme-row">
@@ -77,6 +79,12 @@
           <h3>Pomodoro</h3>
           <p>Work in focused sessions and take meaningful breaks above the clouds.</p>
           <button class="btn btn-primary" data-nav="pomodoro">Start Focus</button>
+        </div>
+        <div class="feature-card reveal-target">
+          <span class="icon">⏱</span>
+          <h3>Activity</h3>
+          <p>Start a timer for whatever you're doing and watch your time add up.</p>
+          <button class="btn btn-primary" data-nav="activity">Track Activity</button>
         </div>
         <div class="feature-card reveal-target">
           <span class="icon">◈</span>
@@ -154,14 +162,35 @@
         </select>
       </div>
 
-      <div class="timer-stage">
-        <svg viewBox="0 0 200 200">
-          <circle class="timer-ring-bg" cx="100" cy="100" r="90"></circle>
-          <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
-        </svg>
-        <div class="timer-center">
-          <span class="timer-label" id="timerModeLabel">Focus Time</span>
-          <span class="timer-display" id="timerDisplay">25:00</span>
+      <div class="timer-plant-row">
+        <div class="timer-stage">
+          <svg viewBox="0 0 200 200">
+            <circle class="timer-ring-bg" cx="100" cy="100" r="90"></circle>
+            <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="timer-center">
+            <span class="timer-label" id="timerModeLabel">Focus Time</span>
+            <span class="timer-display" id="timerDisplay">25:00</span>
+          </div>
+        </div>
+
+        <div class="plant-stage" id="plantStage" aria-hidden="true">
+          <svg id="plantSvg" viewBox="0 0 200 220">
+            <line x1="30" y1="198" x2="170" y2="198" class="plant-ground"></line>
+            <ellipse id="plantMound" cx="100" cy="198" rx="34" ry="7" class="plant-mound"></ellipse>
+            <path id="plantStem" d="M100 198 C 100 170 100 140 100 84" class="plant-stem"></path>
+            <path id="plantLeafLeft" class="plant-leaf plant-leaf-left" d="M100 158 C 76 158 58 146 52 122 C 80 124 100 140 100 158 Z"></path>
+            <path id="plantLeafRight" class="plant-leaf plant-leaf-right" d="M100 130 C 124 130 142 118 148 94 C 120 96 100 112 100 130 Z"></path>
+            <g id="plantFlower" class="plant-flower">
+              <circle cx="88" cy="72" r="9" class="flower-petal"></circle>
+              <circle cx="112" cy="72" r="9" class="flower-petal"></circle>
+              <circle cx="100" cy="60" r="9" class="flower-petal"></circle>
+              <circle cx="100" cy="84" r="9" class="flower-petal"></circle>
+              <circle cx="100" cy="72" r="7" class="flower-center"></circle>
+            </g>
+            <ellipse id="plantSeed" cx="100" cy="194" rx="8" ry="6" class="plant-seed"></ellipse>
+          </svg>
+          <p class="plant-caption" id="plantCaption">Plant a seed and watch it grow as you focus</p>
         </div>
       </div>
 
@@ -177,6 +206,43 @@
         <div class="tomatoes" id="tomatoDots">—</div>
         <div class="count-line" id="sessionCountLine">0 sessions completed today</div>
         <div class="time-line" id="focusTimeLine">Total focus time: 0 minutes</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACTIVITY ================= -->
+  <section class="view" id="view-activity">
+    <div class="page-head">
+      <h1>Track Your Time</h1>
+      <p>Start a timer for whatever you're doing, and watch it add up.</p>
+    </div>
+
+    <div class="activity-wrap">
+      <div class="stat-row">
+        <div class="stat-card"><span class="num" id="activityTodayTotal">0m</span><span class="lbl">Today</span></div>
+        <div class="stat-card"><span class="num" id="activityTodayCount">0</span><span class="lbl">Sessions</span></div>
+        <div class="stat-card"><span class="num" id="activityAllTimeTotal">0m</span><span class="lbl">All Time</span></div>
+      </div>
+
+      <div class="todo-card activity-timer-card">
+        <h2>Start Tracking</h2>
+        <div class="add-row" id="activityIdleRow">
+          <input type="text" id="activityNameInput" placeholder="What are you working on?" aria-label="Activity name">
+          <button class="add-btn" id="activityStartBtn">▶ Start</button>
+        </div>
+        <div class="activity-running" id="activityRunningRow" hidden>
+          <div class="activity-running-info">
+            <span class="activity-status-dot" aria-hidden="true"></span>
+            <span class="activity-running-name" id="activityRunningName"></span>
+          </div>
+          <span class="activity-elapsed" id="activityElapsedDisplay">00:00:00</span>
+          <button class="btn btn-primary activity-stop-btn" id="activityStopBtn">■ Stop</button>
+        </div>
+      </div>
+
+      <div class="todo-card">
+        <h2>Activity Log</h2>
+        <ul class="task-list activity-entry-list" id="activityEntryList"></ul>
       </div>
     </div>
   </section>
