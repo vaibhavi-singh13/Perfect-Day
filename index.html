@@ -24,7 +24,7 @@
       <li><button data-nav="home" class="active">Home</button></li>
       <li><button data-nav="tasks">Tasks</button></li>
       <li><button data-nav="pomodoro">Pomodoro</button></li>
-      <li><button data-nav="activity">Activity</button></li>
+      <li><button data-nav="activity">Timer</button></li>
       <li><button data-nav="budget">Budget</button></li>
       <li><button data-nav="about">About</button></li>
     </ul>
@@ -40,7 +40,7 @@
   <button data-nav="home" class="active">Home</button>
   <button data-nav="tasks">Tasks</button>
   <button data-nav="pomodoro">Pomodoro</button>
-  <button data-nav="activity">Activity</button>
+  <button data-nav="activity">Timer</button>
   <button data-nav="budget">Budget</button>
   <button data-nav="about">About</button>
   <div class="mm-theme-row">
@@ -104,7 +104,6 @@
   <section class="view" id="view-tasks">
     <div class="page-head">
       <h1>Plan Your Day</h1>
-      <p>Turn your thoughts into clear, manageable tasks.</p>
     </div>
 
     <div class="tasks-wrap">
@@ -145,7 +144,6 @@
   <section class="view" id="view-pomodoro">
     <div class="page-head">
       <h1>Find Your Focus</h1>
-      <p>One focused moment at a time.</p>
     </div>
 
     <div class="pomo-wrap">
@@ -155,50 +153,45 @@
         <button data-mode="long">Long Break</button>
       </div>
 
-      <div class="focus-task-select">
-        <label for="focusTaskSelect">Focusing on</label>
-        <select id="focusTaskSelect">
-          <option value="">No task selected</option>
-        </select>
-      </div>
+      <div class="todo-card pomo-stage-card">
+        <div class="timer-plant-row">
+          <div class="timer-stage">
+            <svg viewBox="0 0 200 200">
+              <circle class="timer-ring-bg" cx="100" cy="100" r="90"></circle>
+              <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="timer-center">
+              <span class="timer-label" id="timerModeLabel">Focus Time</span>
+              <span class="timer-display" id="timerDisplay">25:00</span>
+            </div>
+          </div>
 
-      <div class="timer-plant-row">
-        <div class="timer-stage">
-          <svg viewBox="0 0 200 200">
-            <circle class="timer-ring-bg" cx="100" cy="100" r="90"></circle>
-            <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
-          </svg>
-          <div class="timer-center">
-            <span class="timer-label" id="timerModeLabel">Focus Time</span>
-            <span class="timer-display" id="timerDisplay">25:00</span>
+          <div class="plant-stage" id="plantStage" aria-hidden="true">
+            <svg id="plantSvg" viewBox="0 0 200 220">
+              <line x1="30" y1="198" x2="170" y2="198" class="plant-ground"></line>
+              <ellipse id="plantMound" cx="100" cy="198" rx="34" ry="7" class="plant-mound"></ellipse>
+              <path id="plantStem" d="M100 198 C 100 170 100 140 100 84" class="plant-stem"></path>
+              <path id="plantLeafLeft" class="plant-leaf plant-leaf-left" d="M100 158 C 76 158 58 146 52 122 C 80 124 100 140 100 158 Z"></path>
+              <path id="plantLeafRight" class="plant-leaf plant-leaf-right" d="M100 130 C 124 130 142 118 148 94 C 120 96 100 112 100 130 Z"></path>
+              <g id="plantFlower" class="plant-flower">
+                <circle cx="88" cy="72" r="9" class="flower-petal"></circle>
+                <circle cx="112" cy="72" r="9" class="flower-petal"></circle>
+                <circle cx="100" cy="60" r="9" class="flower-petal"></circle>
+                <circle cx="100" cy="84" r="9" class="flower-petal"></circle>
+                <circle cx="100" cy="72" r="7" class="flower-center"></circle>
+              </g>
+              <ellipse id="plantSeed" cx="100" cy="194" rx="8" ry="6" class="plant-seed"></ellipse>
+            </svg>
+            <p class="plant-caption" id="plantCaption">Plant a seed and watch it grow as you focus</p>
           </div>
         </div>
 
-        <div class="plant-stage" id="plantStage" aria-hidden="true">
-          <svg id="plantSvg" viewBox="0 0 200 220">
-            <line x1="30" y1="198" x2="170" y2="198" class="plant-ground"></line>
-            <ellipse id="plantMound" cx="100" cy="198" rx="34" ry="7" class="plant-mound"></ellipse>
-            <path id="plantStem" d="M100 198 C 100 170 100 140 100 84" class="plant-stem"></path>
-            <path id="plantLeafLeft" class="plant-leaf plant-leaf-left" d="M100 158 C 76 158 58 146 52 122 C 80 124 100 140 100 158 Z"></path>
-            <path id="plantLeafRight" class="plant-leaf plant-leaf-right" d="M100 130 C 124 130 142 118 148 94 C 120 96 100 112 100 130 Z"></path>
-            <g id="plantFlower" class="plant-flower">
-              <circle cx="88" cy="72" r="9" class="flower-petal"></circle>
-              <circle cx="112" cy="72" r="9" class="flower-petal"></circle>
-              <circle cx="100" cy="60" r="9" class="flower-petal"></circle>
-              <circle cx="100" cy="84" r="9" class="flower-petal"></circle>
-              <circle cx="100" cy="72" r="7" class="flower-center"></circle>
-            </g>
-            <ellipse id="plantSeed" cx="100" cy="194" rx="8" ry="6" class="plant-seed"></ellipse>
-          </svg>
-          <p class="plant-caption" id="plantCaption">Plant a seed and watch it grow as you focus</p>
-        </div>
-      </div>
-
-      <div class="pomo-controls">
-        <button class="btn btn-primary pomo-main-btn" id="startPauseBtn">Start</button>
-        <div class="pomo-sub-controls">
-          <button class="btn btn-ghost" id="resetBtn">Reset</button>
-          <button class="btn btn-ghost" id="skipBtn">Skip</button>
+        <div class="pomo-controls">
+          <button class="btn btn-primary pomo-main-btn" id="startPauseBtn">Start</button>
+          <div class="pomo-sub-controls">
+            <button class="btn btn-ghost" id="resetBtn">Reset</button>
+            <button class="btn btn-ghost" id="skipBtn">Skip</button>
+          </div>
         </div>
       </div>
 
@@ -214,7 +207,6 @@
   <section class="view" id="view-activity">
     <div class="page-head">
       <h1>Track Your Time</h1>
-      <p>Start a timer for whatever you're doing, and watch it add up.</p>
     </div>
 
     <div class="activity-wrap">
@@ -251,7 +243,6 @@
   <section class="view" id="view-budget">
     <div class="page-head">
       <h1>Track Your Budget</h1>
-      <p>See where today's money goes, then zoom out to the whole month.</p>
     </div>
 
     <div class="budget-wrap">

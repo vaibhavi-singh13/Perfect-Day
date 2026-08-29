@@ -316,7 +316,6 @@ const filterButtons = document.querySelectorAll(".filters button");
 const statTotal = document.getElementById("statTotal");
 const statRemaining = document.getElementById("statRemaining");
 const statCompleted = document.getElementById("statCompleted");
-const focusTaskSelect = document.getElementById("focusTaskSelect");
 
 function uid(){ return "t" + Date.now() + Math.floor(Math.random()*1000); }
 
@@ -327,7 +326,6 @@ function addTask(){
   taskInput.value = "";
   saveTasks();
   renderTasks();
-  renderFocusTaskOptions();
   taskInput.focus();
 }
 addTaskBtn.addEventListener("click", addTask);
@@ -347,7 +345,6 @@ function deleteTask(id){
     tasks = tasks.filter(x => x.id !== id);
     saveTasks();
     renderTasks();
-    renderFocusTaskOptions();
   };
   if(el){
     el.classList.add("removing");
@@ -366,7 +363,6 @@ function saveEdit(id, newTitle){
   if(trimmed) t.title = trimmed;
   saveTasks();
   renderTasks();
-  renderFocusTaskOptions();
 }
 
 clearCompletedBtn.addEventListener("click", () => {
@@ -377,7 +373,6 @@ clearCompletedBtn.addEventListener("click", () => {
     tasks = tasks.filter(t => !t.completed);
     saveTasks();
     renderTasks();
-    renderFocusTaskOptions();
   }, 280);
 });
 
@@ -518,8 +513,7 @@ let pomoState = {
   running:false,
   intervalId:null,
   focusCyclesCompleted: initialStats.cyclesToday || 0,
-  totalFocusMinutes: initialStats.totalFocusMinutes || 0,
-  focusTaskId:""
+  totalFocusMinutes: initialStats.totalFocusMinutes || 0
 };
 
 const modeButtons = document.querySelectorAll(".mode-switch[aria-label='Pomodoro mode'] button");
@@ -589,18 +583,6 @@ function updatePlant(progress){
 }
 
 updatePlant(0);
-
-function renderFocusTaskOptions(){
-  const activeOnes = tasks.filter(t => !t.completed);
-  const prevValue = focusTaskSelect.value;
-  focusTaskSelect.innerHTML = `<option value="">No task selected</option>` +
-    activeOnes.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join("");
-  if(activeOnes.some(t => t.id === prevValue)){
-    focusTaskSelect.value = prevValue;
-  }
-}
-renderFocusTaskOptions();
-focusTaskSelect.addEventListener("change", () => { pomoState.focusTaskId = focusTaskSelect.value; });
 
 function formatTime(sec){
   const m = Math.floor(sec/60).toString().padStart(2,"0");

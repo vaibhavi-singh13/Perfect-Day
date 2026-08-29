@@ -654,6 +654,13 @@ a{color:inherit;}
 }
 .mode-switch button.active{background:var(--card-bg-strong); box-shadow:0 8px 18px rgba(6,70,130,0.2); color:var(--deep-sky);}
 
+/* Card wrapping the timer + plant + controls, matching the card style
+   used on the Tasks / Activity / Budget tabs. */
+.pomo-stage-card{
+  margin-bottom:30px;
+  padding:40px 30px 34px;
+}
+
 .focus-task-select{margin-bottom:34px;}
 .focus-task-select label{
   display:block; font-size:0.75rem; font-weight:800; letter-spacing:1.5px;
@@ -673,14 +680,13 @@ a{color:inherit;}
 
 .timer-stage{position:relative; width:min(280px,62vw); height:min(280px,62vw); flex-shrink:0;}
 .timer-stage svg{width:100%;height:100%; transform:rotate(-90deg);}
-.timer-ring-bg{fill:none; stroke:rgba(255,255,255,0.24); stroke-width:14;}
-.timer-ring{fill:none; stroke:var(--hero-text); stroke-width:14; stroke-linecap:round; transition:stroke-dashoffset .3s ease;}
+.timer-ring-bg{fill:none; stroke:var(--input-border); stroke-width:14;}
+.timer-ring{fill:none; stroke:var(--deep-sky); stroke-width:14; stroke-linecap:round; transition:stroke-dashoffset .3s ease, stroke 0.7s var(--ease);}
 .timer-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-.timer-label{color:var(--hero-text-soft); font-weight:800; letter-spacing:2px; font-size:0.78rem; text-transform:uppercase; margin-bottom:8px;}
+.timer-label{color:var(--soft-text); font-weight:800; letter-spacing:2px; font-size:0.78rem; text-transform:uppercase; margin-bottom:8px;}
 .timer-display{
-  font-family:var(--font-display); color:var(--hero-text);
+  font-family:var(--font-display); color:var(--deep-text);
   font-size:clamp(2.6rem,10vw,3.6rem); font-weight:700;
-  text-shadow:var(--shadow-text);
   font-variant-numeric:tabular-nums;
 }
 
@@ -691,7 +697,7 @@ a{color:inherit;}
   flex-shrink:0;
 }
 #plantSvg{width:100%; height:auto; overflow:visible;}
-.plant-ground{stroke:var(--plant-ground); stroke-width:3; stroke-linecap:round; transition:stroke 0.7s var(--ease);}
+.plant-ground{stroke:var(--input-border); stroke-width:3; stroke-linecap:round; transition:stroke 0.7s var(--ease);}
 .plant-mound{fill:var(--plant-mound); transition:fill 0.7s var(--ease);}
 .plant-seed{fill:var(--plant-seed); transition:opacity .5s ease, fill 0.7s var(--ease);}
 .plant-stem{
@@ -715,14 +721,23 @@ a{color:inherit;}
 .plant-flower .flower-center{fill:var(--plant-flower-center);}
 .plant-caption{
   margin:0; font-size:0.82rem; font-weight:700;
-  color:var(--hero-text-soft); text-align:center;
+  color:var(--soft-text); text-align:center;
   min-height:2.4em; display:flex; align-items:center; justify-content:center;
 }
 
-.pomo-controls{display:flex; flex-direction:column; align-items:center; gap:16px; margin-bottom:36px;}
+.pomo-controls{display:flex; flex-direction:column; align-items:center; gap:16px; margin-bottom:0;}
 .pomo-main-btn{min-width:180px; padding:18px 40px;}
 .pomo-sub-controls{display:flex; gap:14px;}
 .pomo-sub-controls .btn{padding:12px 26px; font-size:0.88rem;}
+/* Reset / Skip now sit inside the light card rather than directly on the
+   sky, so they need card-appropriate colors instead of the translucent
+   white style used elsewhere. */
+.pomo-stage-card .btn-ghost{
+  background:var(--input-bg);
+  color:var(--deep-sky);
+  border:1.5px solid var(--input-border);
+}
+[data-theme="dark"] .pomo-stage-card .btn-ghost{color:var(--hero-text);}
 
 .session-card{
   background:var(--card-bg);
@@ -754,6 +769,7 @@ a{color:inherit;}
 @media (max-width:640px){
   .timer-plant-row{gap:24px;}
   .plant-stage{width:min(160px,44vw);}
+  .pomo-stage-card{padding:32px 20px 26px;}
 }
 
 /* ============================================================
